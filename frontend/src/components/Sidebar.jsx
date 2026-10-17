@@ -10,6 +10,7 @@ const CheckIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColo
 const FaceIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
 const ListIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>;
 const ChartIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>;
+const CashIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
 const StudentIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
 const PlusUserIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>;
 const AuditIcon = () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>;
@@ -84,25 +85,31 @@ export default function Sidebar({ onNavigate }) {
         <div style={{ animationDelay: '0.15s' }}>
           <NavItem to="/face-enrollment" icon={<FaceIcon />} label="Face Enrollment" onClick={onNavigate} />
         </div>
+        <div style={{ animationDelay: '0.165s' }}>
+          <NavItem to="/announcements" icon={<BullhornIcon />} label="Announcements" onClick={onNavigate} />
+        </div>
 
         <SectionLabel label="Analytics" />
         <div style={{ animationDelay: '0.18s' }}>
           <NavItem to="/attendance" icon={<ListIcon />} label="Attendance Logs" onClick={onNavigate} />
         </div>
         <div style={{ animationDelay: '0.21s' }}>
+          <NavItem to="/fines" icon={<CashIcon />} label="Fines" onClick={onNavigate} />
+        </div>
+        <div style={{ animationDelay: '0.24s' }}>
           <NavItem to="/reports" icon={<ChartIcon />} label="Reports" onClick={onNavigate} />
         </div>
 
         {user?.role === 'admin' && (
           <>
             <SectionLabel label="Admin" />
-            <div style={{ animationDelay: '0.24s' }}>
+            <div style={{ animationDelay: '0.27s' }}>
               <NavItem to="/users" icon={<UsersIcon />} label="Users" onClick={onNavigate} />
             </div>
-            <div style={{ animationDelay: '0.27s' }}>
+            <div style={{ animationDelay: '0.3s' }}>
               <NavItem to="/audit-logs" icon={<AuditIcon />} label="Audit Logs" onClick={onNavigate} />
             </div>
-            <div style={{ animationDelay: '0.3s' }}>
+            <div style={{ animationDelay: '0.33s' }}>
               <button onClick={() => setRegisterOpen(true)}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-150 animate-staggerIn">
                 <span className="text-gray-600 dark:text-gray-400"><PlusUserIcon /></span>
@@ -114,7 +121,7 @@ export default function Sidebar({ onNavigate }) {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-green-200 dark:border-gray-800 flex-shrink-0 animate-fadeIn" style={{ animationDelay: '0.35s' }}>
+      <div className="px-4 py-3 border-t border-green-200 dark:border-gray-800 flex-shrink-0 animate-fadeIn" style={{ animationDelay: '0.38s' }}>
         <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user?.name}</p>
         <p className="text-[10px] text-gray-500 dark:text-gray-500 capitalize">{user?.role}</p>
       </div>

@@ -11,7 +11,7 @@ import EventDetailsModal from './src/components/EventDetailsModal';
 import BarcodeScanner from './src/components/BarcodeScanner';
 import { useTheme } from './src/context/ThemeContext';
 
-const API_URL = 'http://192.168.1.17:8000/api';
+const API_URL = 'http://10.100.103.26:8000/api';
 
 // Configure axios timeout
 axios.defaults.timeout = 10000; // 10 seconds timeout

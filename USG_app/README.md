@@ -1,125 +1,145 @@
-# U-EventTrack Mobile App
+# USG App - Expo SDK 57
 
-Mobile application for Mindoro State University - Bongabong Campus event attendance tracking system.
+## ✅ Current Configuration
 
-## Features
+This app is correctly configured with **Expo SDK 57**:
 
-- 📢 View public announcements
-- 📅 Browse upcoming and ongoing events
-- 🔐 Student login
-- 📊 Real-time event updates
-- 🎨 Modern UI matching the web application design
+- **Expo SDK:** 57.0.0
+- **React Native:** 0.86.0 (Official version for SDK 57)
+- **React:** 19.2.0 (Required for SDK 57)
 
-## Setup Instructions
+All versions are per [Expo SDK 57 official documentation](https://expo.dev/changelog/sdk-57).
 
-### 1. Install Dependencies
+## 🚀 Quick Start
 
-```bash
-npm install
-```
-
-### 2. Configure Backend URL
-
-Edit `src/config/api.js` and update the `API_BASE_URL` with your backend server IP address:
-
-```javascript
-export const API_BASE_URL = 'http://YOUR_IP_ADDRESS:8000/api';
-```
-
-**To find your IP address:**
-- **Windows**: Run `ipconfig` in Command Prompt, look for IPv4 Address
-- **Mac/Linux**: Run `ifconfig` in Terminal, look for inet address
-
-**Important:** 
-- Your phone and computer must be on the same WiFi network
-- Your Laravel backend must be running (`php artisan serve --host=0.0.0.0`)
-
-### 3. Start the Development Server
-
-```bash
+### Start the App
+```powershell
 npm start
 ```
 
-### 4. Run on Your Device
+Or double-click: `start-app.bat`
 
-**Option 1: Expo Go (Recommended)**
-1. Install Expo Go app from Play Store (Android) or App Store (iOS)
-2. Scan the QR code shown in the terminal
-3. The app will load on your phone
-
-**Option 2: Web Browser**
-```bash
-npm run web
+### Start Backend and App Together
+```
+Double-click: ..\start-both-servers.bat
 ```
 
-## Project Structure
+This starts both:
+- Laravel backend (port 8000)
+- Expo development server
+
+## 📱 Testing on Phone
+
+1. Install **Expo Go** app (latest version with SDK 57 support)
+2. Make sure phone and computer are on same WiFi
+3. Scan QR code from terminal
+4. App loads successfully!
+
+## 🔌 Backend Connection
+
+### Current API URL:
+```javascript
+const API_URL = 'http://172.31.178.26:8000/api';
+```
+
+### To Update API URL:
+1. Find your IP: `ipconfig`
+2. Edit `App.jsx`
+3. Change `API_URL` to your IP
+4. Restart app
+
+### Start Backend:
+```powershell
+cd ..\backend
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+## 📁 Project Structure
 
 ```
 USG_app/
+├── App.jsx                 # Main app component
+├── styles.js              # Global styles
+├── package.json           # Dependencies (SDK 57)
+├── app.json              # Expo configuration
 ├── src/
-│   ├── config/
-│   │   └── api.js          # API configuration
-│   └── screens/
-│       ├── HomeScreen.js   # Landing page with announcements
-│       ├── EventsScreen.js # Events listing
-│       └── LoginScreen.js  # Login form
-├── App.js                  # Main navigation setup
-└── package.json
+│   ├── components/       # Reusable components
+│   ├── screens/          # Screen components
+│   ├── context/          # Context providers
+│   └── config/           # Configuration
+└── assets/               # Images and resources
 ```
 
-## API Endpoints Used
+## 🛠️ Development
 
-- `GET /api/announcements/public` - Fetch public announcements
-- `GET /api/events/active` - Fetch active events (upcoming/ongoing)
-- `POST /api/login` - User authentication
+### Install Dependencies
+```powershell
+npm install --legacy-peer-deps
+```
 
-## Design System
+### Clear Cache
+```powershell
+npx expo start --clear
+```
 
-The app follows the same design system as the web application:
-- **Primary Color**: Green (#10b981)
-- **Secondary Color**: Emerald (#059669)
-- **Typography**: System fonts (San Francisco on iOS, Roboto on Android)
-- **Spacing**: Consistent 4px grid system
+### Update Dependencies
+```powershell
+npx expo install --fix
+```
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
-### "Network Error" or "Request Failed"
+### Network Error
+- Start backend server: `php artisan serve --host=0.0.0.0`
+- Check both devices on same WiFi
+- Update API_URL in App.jsx with correct IP
 
-1. Check that your backend is running:
-   ```bash
-   cd backend
-   php artisan serve --host=0.0.0.0
-   ```
+### Module Not Found
+```powershell
+npm install --legacy-peer-deps
+```
 
-2. Verify your phone and computer are on the same WiFi network
+### Cache Issues
+```powershell
+npx expo start --clear
+```
 
-3. Update the IP address in `src/config/api.js`
+### Version Mismatch
+Make sure Expo Go app on phone is updated to latest version with SDK 57 support.
 
-4. Check your firewall settings - port 8000 should be accessible
+## ✅ Success Indicators
 
-### App Won't Load in Expo Go
+Working correctly when:
+- ✅ No TurboModule errors
+- ✅ App loads to login screen
+- ✅ Can navigate between screens
+- ✅ Backend connection works
+- ✅ All features functional
 
-1. Make sure Expo CLI is up to date:
-   ```bash
-   npm install -g expo-cli
-   ```
+## 📚 Key Features
 
-2. Clear the cache:
-   ```bash
-   npx expo start --clear
-   ```
+- QR Code scanning for attendance
+- Event check-ins with geolocation
+- Facial recognition enrollment
+- Real-time announcements
+- Dashboard with statistics
+- Dark mode support
+- Offline-first architecture
 
-3. Restart the Metro bundler
+## 🎯 Version History
 
-## Next Steps
+- **v1.0.0** - Initial release with Expo SDK 57
+- Migrated from SDK 52 to SDK 57
+- Fixed TurboModule compatibility issues
+- Updated to React Native 0.86.0
 
-- [ ] Add student dashboard
-- [ ] Implement attendance history
-- [ ] Add QR code scanner for check-in
-- [ ] Implement push notifications
-- [ ] Add offline support
-- [ ] Integrate GPS verification
+## 📝 Notes
 
-## License
+- Keep backend server running while testing
+- Backend URL will change if computer IP changes
+- Update Expo Go app regularly
+- Test on physical device, not just emulator
 
-© 2026 Mindoro State University - Bongabong Campus
+---
+
+**For detailed troubleshooting, see `CORRECT_SDK57_INSTALL.md`**

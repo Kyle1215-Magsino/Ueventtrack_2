@@ -9,10 +9,20 @@ use Carbon\Carbon;
 
 class FineCalculationService
 {
-    const FINE_AMOUNT = 25.00;
+    // Fine amounts per your requirements
+    const FINE_PER_CHECKPOINT = 25.00;  // ₱25 per missed check-in/out
+    const FINE_WHOLE_MORNING = 50.00;   // ₱50 if miss entire morning
+    const FINE_WHOLE_AFTERNOON = 50.00; // ₱50 if miss entire afternoon
+    const FINE_WHOLE_DAY = 100.00;      // ₱100 if miss entire day
     
     /**
      * Calculate and create fines for an attendance record
+     * 
+     * Fine Structure:
+     * - ₱25 per missed check-in or check-out
+     * - ₱50 if miss entire morning (both check-in and check-out)
+     * - ₱50 if miss entire afternoon (both check-in and check-out)
+     * - ₱100 if miss entire day (all 4 checkpoints)
      */
     public static function calculateFinesForAttendance(Attendance $attendance)
     {
@@ -24,88 +34,95 @@ class FineCalculationService
         }
         
         $fines = [];
+        $missedCheckpoints = [];
         
-        // Check morning time-in
-        if (self::isMorningTimeInViolation($attendance, $event)) {
-            $fines[] = self::createFine($attendance, 'morning_in', self::determineViolationType($attendance));
+        // Check each checkpoint
+        $morningInMissed = self::isMorningTimeInMissing($attendance, $event);
+        $morningOutMissed = self::isMorningTimeOutMissing($attendance, $event);
+        $afternoonInMissed = self::isAfternoonTimeInMissing($attendance, $event);
+        $afternoonOutMissed = self::isAfternoonTimeOutMissing($attendance, $event);
+        
+        // Check if missed entire day (all 4 checkpoints)
+        if ($morningInMissed && $morningOutMissed && $afternoonInMissed && $afternoonOutMissed) {
+            // Absent for entire day - ₱100
+            $fines[] = self::createFine($attendance, 'whole_day', 'absent', self::FINE_WHOLE_DAY);
+            return $fines;
         }
         
-        // Check morning time-out
-        if (self::isMorningTimeOutViolation($attendance, $event)) {
-            $fines[] = self::createFine($attendance, 'morning_out', self::determineViolationType($attendance));
+        // Check if missed entire morning (both checkpoints)
+        if ($morningInMissed && $morningOutMissed) {
+            // Missed entire morning - ₱50
+            $fines[] = self::createFine($attendance, 'whole_morning', 'absent', self::FINE_WHOLE_MORNING);
+        } else {
+            // Check individual morning checkpoints - ₱25 each
+            if ($morningInMissed) {
+                $fines[] = self::createFine($attendance, 'morning_in', 'absent', self::FINE_PER_CHECKPOINT);
+            }
+            if ($morningOutMissed) {
+                $fines[] = self::createFine($attendance, 'morning_out', 'incomplete', self::FINE_PER_CHECKPOINT);
+            }
         }
         
-        // Check afternoon time-in
-        if (self::isAfternoonTimeInViolation($attendance, $event)) {
-            $fines[] = self::createFine($attendance, 'afternoon_in', self::determineViolationType($attendance));
-        }
-        
-        // Check afternoon time-out
-        if (self::isAfternoonTimeOutViolation($attendance, $event)) {
-            $fines[] = self::createFine($attendance, 'afternoon_out', self::determineViolationType($attendance));
+        // Check if missed entire afternoon (both checkpoints)
+        if ($afternoonInMissed && $afternoonOutMissed) {
+            // Missed entire afternoon - ₱50
+            $fines[] = self::createFine($attendance, 'whole_afternoon', 'absent', self::FINE_WHOLE_AFTERNOON);
+        } else {
+            // Check individual afternoon checkpoints - ₱25 each
+            if ($afternoonInMissed) {
+                $fines[] = self::createFine($attendance, 'afternoon_in', 'absent', self::FINE_PER_CHECKPOINT);
+            }
+            if ($afternoonOutMissed) {
+                $fines[] = self::createFine($attendance, 'afternoon_out', 'incomplete', self::FINE_PER_CHECKPOINT);
+            }
         }
         
         return $fines;
     }
     
-    private static function isMorningTimeInViolation(Attendance $attendance, Event $event)
+    /**
+     * Check if morning time-in is missing (₱25)
+     */
+    private static function isMorningTimeInMissing(Attendance $attendance, Event $event)
     {
-        if (!$attendance->check_in_time) {
-            return true; // Absent
-        }
-        
-        $checkInTime = Carbon::parse($attendance->check_in_time);
-        $morningStart = Carbon::parse($event->event_date . ' ' . $event->morning_start_time);
-        
-        // Late if more than 15 minutes after morning start
-        return $checkInTime->gt($morningStart->addMinutes(15));
+        return !$attendance->check_in_time;
     }
     
-    private static function isMorningTimeOutViolation(Attendance $attendance, Event $event)
+    /**
+     * Check if morning time-out is missing (₱25)
+     */
+    private static function isMorningTimeOutMissing(Attendance $attendance, Event $event)
     {
-        // If no check-out time for morning period
         return !$attendance->morning_check_out_time;
     }
     
-    private static function isAfternoonTimeInViolation(Attendance $attendance, Event $event)
+    /**
+     * Check if afternoon time-in is missing (₱25)
+     */
+    private static function isAfternoonTimeInMissing(Attendance $attendance, Event $event)
     {
-        // If no afternoon check-in time
-        if (!$attendance->afternoon_check_in_time) {
-            return true;
-        }
-        
-        $checkInTime = Carbon::parse($attendance->afternoon_check_in_time);
-        $afternoonStart = Carbon::parse($event->event_date . ' ' . $event->afternoon_start_time);
-        
-        // Late if more than 15 minutes after afternoon start
-        return $checkInTime->gt($afternoonStart->addMinutes(15));
+        return !$attendance->afternoon_check_in_time;
     }
     
-    private static function isAfternoonTimeOutViolation(Attendance $attendance, Event $event)
+    /**
+     * Check if afternoon time-out is missing (₱25)
+     */
+    private static function isAfternoonTimeOutMissing(Attendance $attendance, Event $event)
     {
-        // If no check-out time for afternoon period
         return !$attendance->check_out_time;
     }
     
-    private static function determineViolationType(Attendance $attendance)
-    {
-        if ($attendance->status === 'absent') {
-            return 'absent';
-        } elseif ($attendance->status === 'late') {
-            return 'late';
-        } else {
-            return 'incomplete';
-        }
-    }
-    
-    private static function createFine(Attendance $attendance, string $period, string $violationType)
+    /**
+     * Create a fine record
+     */
+    private static function createFine(Attendance $attendance, string $period, string $violationType, float $amount)
     {
         return Fine::create([
             'student_id' => $attendance->student_id,
             'event_id' => $attendance->event_id,
             'period' => $period,
             'violation_type' => $violationType,
-            'amount' => self::FINE_AMOUNT,
+            'amount' => $amount,
             'payment_status' => 'unpaid',
         ]);
     }
