@@ -21,6 +21,7 @@ class Event extends Model
         'venue_radius',
         'status',
         'created_by',
+        'academic_year_id',
     ];
 
     protected function casts(): array
@@ -41,5 +42,10 @@ class Event extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'event_id');
+    }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
     }
 }

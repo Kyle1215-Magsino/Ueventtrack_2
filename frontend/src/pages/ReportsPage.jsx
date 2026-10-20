@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { getReports } from '../api/attendanceApi';
+import { downloadSummaryPDF } from '../api/reportApi';
+import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import LoadingSpinner from '../components/LoadingSpinner';
 const ChartTooltip = ({ active, payload, label }) => {
@@ -65,6 +67,21 @@ export default function ReportsPage() {
         </div>
         <div className="flex items-center gap-3 flex-wrap">
         {data && (
+          <>
+          <button
+            onClick={async () => {
+              try {
+                await downloadSummaryPDF();
+                toast.success('Summary PDF downloaded!');
+              } catch (error) {
+                toast.error('Failed to download PDF');
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Export PDF
+          </button>
           <button
             onClick={() => {
               const headers = ['Event', 'Attendees'];
@@ -82,6 +99,7 @@ export default function ReportsPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             Export CSV
           </button>
+          </>
         )}
         <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
           {PERIODS.map(p => (

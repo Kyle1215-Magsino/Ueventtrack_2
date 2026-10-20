@@ -24,6 +24,9 @@ import AnnouncementsPage from './pages/AnnouncementsPage';
 import StudentDashboardPage from './pages/StudentDashboardPage';
 import StudentAttendancePage from './pages/StudentAttendancePage';
 import StudentEventsPage from './pages/StudentEventsPage';
+import EventAnalyticsPage from './pages/EventAnalyticsPage';
+import EventViewPage from './pages/EventViewPage';
+import EventEditPage from './pages/EventEditPage';
 
 export default function App() {
   return (
@@ -44,6 +47,9 @@ export default function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/students" element={<StudentsPage />} />
                 <Route path="/events" element={<EventsPage />} />
+                <Route path="/events/:id" element={<EventViewPage />} />
+                <Route path="/events/:id/edit" element={<EventEditPage />} />
+                <Route path="/events/:id/analytics" element={<EventAnalyticsPage />} />
                 <Route path="/checkin" element={<CheckinPage />} />
                 <Route path="/face-enrollment" element={<FaceEnrollmentPage />} />
                 <Route path="/attendance" element={<AttendanceLogsPage />} />

@@ -9,6 +9,8 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\FineController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // Public auth routes
@@ -51,17 +53,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/students/search', [StudentController::class, 'search']);
         Route::get('/students/faces', [StudentController::class, 'getFaceData']);
         Route::get('/students/archived', [StudentController::class, 'archived']);
+        Route::post('/students/check-barcode', [StudentController::class, 'checkBarcodeUniqueness']);
         Route::get('/students/{id}', [StudentController::class, 'show']);
         Route::put('/students/{id}', [StudentController::class, 'update']);
         Route::delete('/students/{id}', [StudentController::class, 'destroy']);
         Route::post('/students/{id}/restore', [StudentController::class, 'restore']);
         Route::post('/students/{id}/face', [StudentController::class, 'saveFaceData']);
+        Route::post('/students/{id}/regenerate-barcode', [StudentController::class, 'regenerateBarcode']);
 
         // Events
         Route::get('/events', [EventController::class, 'index']);
         Route::post('/events', [EventController::class, 'store']);
         Route::get('/events/active', [EventController::class, 'active']);
+        Route::get('/events/analytics', [EventController::class, 'allAnalytics']);
         Route::get('/events/{id}', [EventController::class, 'show']);
+        Route::get('/events/{id}/analytics', [EventController::class, 'analytics']);
         Route::put('/events/{id}', [EventController::class, 'update']);
         Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
@@ -76,6 +82,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/fines/report', [FineController::class, 'report']);
         Route::post('/fines/{fine}/pay', [FineController::class, 'markAsPaid']);
         Route::post('/fines/{fine}/waive', [FineController::class, 'waive']);
+
+        // Academic Years Management (admin/officer only)
+        Route::get('/academic-years', [AcademicYearController::class, 'index']);
+        Route::get('/academic-years/active', [AcademicYearController::class, 'active']);
+        Route::post('/academic-years', [AcademicYearController::class, 'store']);
+        Route::get('/academic-years/{id}', [AcademicYearController::class, 'show']);
+        Route::put('/academic-years/{id}', [AcademicYearController::class, 'update']);
+        Route::post('/academic-years/{id}/activate', [AcademicYearController::class, 'activate']);
+        Route::post('/academic-years/{id}/archive', [AcademicYearController::class, 'archive']);
+        Route::delete('/academic-years/{id}', [AcademicYearController::class, 'destroy']);
+
+        // Reports (admin/officer only)
+        Route::get('/reports/event/{id}/pdf', [ReportController::class, 'exportPDF']);
+        Route::get('/reports/event/{id}/excel', [ReportController::class, 'exportExcel']);
+        Route::get('/reports/student/{id}/pdf', [ReportController::class, 'studentReport']);
+        Route::get('/reports/summary/pdf', [ReportController::class, 'summaryReport']);
 
         // Audit Logs (admin only)
         Route::middleware('role:admin')->group(function () {

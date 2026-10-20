@@ -6,6 +6,7 @@ use App\Http\Requests\EventRequest;
 use App\Models\AuditLog;
 use App\Models\Event;
 use App\Services\EventAnnouncementService;
+use App\Services\EventAnalyticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -148,4 +149,37 @@ class EventController extends Controller
 
         return response()->json($events);
     }
+
+    /**
+     * Get analytics for a specific event
+     */
+    public function analytics(int $id): JsonResponse
+    {
+        try {
+            $analytics = EventAnalyticsService::getEventAnalytics($id);
+            return response()->json($analytics);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving analytics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get analytics summary for all events
+     */
+    public function allAnalytics(): JsonResponse
+    {
+        try {
+            $analytics = EventAnalyticsService::getAllEventsAnalytics();
+            return response()->json($analytics);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving analytics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
+

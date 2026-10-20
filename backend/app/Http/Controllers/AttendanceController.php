@@ -31,20 +31,59 @@ class AttendanceController extends Controller
             ->first();
 
         if (!$student) {
-            return response()->json(['message' => 'Student not found.'], 404);
+            // Log failed attempt
+            \Log::warning('Check-in failed: Student not found', [
+                'identifier' => $request->student_identifier,
+                'event_id' => $request->event_id,
+                'method' => $request->verification_method,
+            ]);
+            
+            return response()->json([
+                'message' => 'Student not found. Please verify your ID or barcode.',
+                'error' => 'STUDENT_NOT_FOUND'
+            ], 404);
         }
 
         if ($student->status !== 'active') {
-            return response()->json(['message' => 'Student is inactive.'], 422);
+            // Log inactive student attempt
+            \Log::warning('Check-in failed: Inactive student', [
+                'student_id' => $student->student_id,
+                'student_name' => $student->first_name . ' ' . $student->last_name,
+                'event_id' => $request->event_id,
+            ]);
+            
+            return response()->json([
+                'message' => 'Student account is inactive. Please contact the administrator.',
+                'error' => 'STUDENT_INACTIVE'
+            ], 422);
         }
 
-        // Check for duplicate check-in
+        // Check for duplicate check-in (ONE BARCODE :: ONE STUDENT per event)
         $existing = Attendance::where('student_id', $student->id)
             ->where('event_id', $event->id)
             ->first();
 
         if ($existing) {
-            return response()->json(['message' => 'Student already checked in for this event.'], 422);
+            // Log duplicate attempt
+            \Log::info('Check-in blocked: Duplicate attempt', [
+                'student_id' => $student->student_id,
+                'student_name' => $student->first_name . ' ' . $student->last_name,
+                'event_id' => $request->event_id,
+                'event_name' => $event->event_name,
+                'original_checkin' => $existing->check_in_time,
+                'verification_method' => $request->verification_method,
+            ]);
+            
+            return response()->json([
+                'message' => 'You have already checked in for this event.',
+                'error' => 'ALREADY_CHECKED_IN',
+                'details' => [
+                    'student_name' => $student->first_name . ' ' . $student->last_name,
+                    'event_name' => $event->event_name,
+                    'original_checkin_time' => $existing->check_in_time->format('M d, Y h:i A'),
+                    'status' => $existing->status,
+                ]
+            ], 422);
         }
 
         // Determine late status
@@ -74,6 +113,17 @@ class AttendanceController extends Controller
             'status' => $status,
         ]);
 
+        // Log successful check-in
+        \Log::info('Check-in successful', [
+            'student_id' => $student->student_id,
+            'student_name' => $student->first_name . ' ' . $student->last_name,
+            'event_id' => $request->event_id,
+            'event_name' => $event->event_name,
+            'status' => $status,
+            'verification_method' => $request->verification_method,
+            'location_verified' => $locationVerified,
+        ]);
+
         // Clear attendance cache
         Cache::forget('attendance_logs');
 
@@ -89,6 +139,9 @@ class AttendanceController extends Controller
             'message' => 'Check-in successful.',
             'status' => $status,
             'student_name' => $student->first_name . ' ' . $student->last_name,
+            'student_id' => $student->student_id,
+            'course' => $student->course,
+            'year_level' => $student->year_level,
         ], 201);
     }
 

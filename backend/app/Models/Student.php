@@ -22,6 +22,7 @@ class Student extends Model
         'profile_image',
         'status',
         'archived',
+        'academic_year_id',
     ];
 
     protected function casts(): array
@@ -46,5 +47,10 @@ class Student extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'student_id');
+    }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
     }
 }

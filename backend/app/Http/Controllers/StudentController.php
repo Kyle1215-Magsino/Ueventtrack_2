@@ -141,4 +141,63 @@ class StudentController extends Controller
 
         return response()->json($students);
     }
+
+    public function checkBarcodeUniqueness(Request $request): JsonResponse
+    {
+        $request->validate([
+            'barcode' => 'required|string',
+            'exclude_student_id' => 'nullable|integer',
+        ]);
+
+        $query = Student::where('barcode', $request->barcode);
+        
+        if ($request->exclude_student_id) {
+            $query->where('id', '!=', $request->exclude_student_id);
+        }
+
+        $existingStudent = $query->first();
+
+        if ($existingStudent) {
+            return response()->json([
+                'available' => false,
+                'message' => 'This barcode is already assigned to another student.',
+                'student' => [
+                    'student_id' => $existingStudent->student_id,
+                    'name' => $existingStudent->first_name . ' ' . $existingStudent->last_name,
+                    'course' => $existingStudent->course,
+                ]
+            ], 200);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'Barcode is available.',
+        ], 200);
+    }
+
+    public function regenerateBarcode(Request $request, int $id): JsonResponse
+    {
+        $student = Student::findOrFail($id);
+        
+        // Generate a unique barcode
+        do {
+            $barcode = 'MBC2023-' . $student->student_id . '-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
+        } while (Student::where('barcode', $barcode)->exists());
+
+        $student->update(['barcode' => $barcode]);
+
+        AuditLog::record('updated', "Regenerated barcode for student: {$student->first_name} {$student->last_name}", 'Student', $student->id, $request->user()?->id, $request->ip());
+
+        \Log::info('Barcode regenerated', [
+            'student_id' => $student->student_id,
+            'student_name' => $student->first_name . ' ' . $student->last_name,
+            'new_barcode' => $barcode,
+        ]);
+
+        return response()->json([
+            'message' => 'Barcode regenerated successfully.',
+            'barcode' => $barcode,
+            'student' => $student->fresh(),
+        ], 200);
+    }
 }
