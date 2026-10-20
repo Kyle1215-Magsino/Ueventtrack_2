@@ -474,6 +474,11 @@ export default function App() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  
+  // Landing page login state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchPublicData = async () => {
     try {
@@ -610,6 +615,24 @@ export default function App() {
       ],
       { cancelable: true }
     );
+  };
+
+  const handleQuickLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
+    setLoading(true);
+    const result = await handleLogin(email, password);
+    setLoading(false);
+
+    if (result.success) {
+      setEmail('');
+      setPassword('');
+    } else {
+      Alert.alert('Login Failed', result.message);
+    }
   };
 
   const onRefresh = async () => {
@@ -922,190 +945,153 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar 
-        style={isDark ? "light" : "dark"} 
+        style={isDark ? "light" : "dark"}
         backgroundColor="transparent"
         translucent={false}
       />
-      
-      {/* Navbar */}
-      <View style={styles.navbar}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <Image 
-              source={require('./assets/usg-logo.png')} 
-              style={styles.logoImage}
-              resizeMode="cover"
-            />
-          </View>
-          <View>
-            <Text style={styles.title}>U-EventTrack</Text>
-            <Text style={styles.subtitle}>MinSU Bongabong</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.signInBtn} onPress={() => setShowLoginModal(true)}>
-          <Text style={styles.signInText}>Sign In</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Announcement Ticker with Events */}
-      <View style={styles.announcementBanner}>
-        <View style={styles.announcementContent}>
-          <View style={styles.liveIndicator}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveText}>LIVE</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.announcementTextContainer}>
-            {events.length > 0 ? (
-              <>
-                <View style={styles.announcementTag}>
-                  <Ionicons name="calendar" size={10} color="#fff" />
-                  <Text style={styles.announcementTagText}>EVENT</Text>
-                </View>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.eventTickerScroll}
-                >
-                  {events.map((event, index) => (
-                    <View key={event.id} style={styles.eventTickerItem}>
-                      <Text style={styles.eventTickerText}>
-                        {event.event_name} • {formatDate(event.event_date)} • {event.venue}
-                      </Text>
-                      {index < events.length - 1 && (
-                        <View style={styles.eventTickerDivider} />
-                      )}
-                    </View>
-                  ))}
-                </ScrollView>
-              </>
-            ) : (
-              <>
-                <View style={[styles.announcementTag, { backgroundColor: tagColor.bg }]}>
-                  <Text style={[styles.announcementTagText, { color: tagColor.text }]}>
-                    {current.tag.toUpperCase()}
-                  </Text>
-                </View>
-                <Text style={styles.announcementText} numberOfLines={2}>{current.text}</Text>
-              </>
-            )}
-          </View>
-        </View>
-      </View>
-
-      <ScrollView 
-        style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#10b981']} />
-        }
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1, backgroundColor: colors.background }}
       >
-        {/* Hero */}
-        <View style={styles.hero}>
-          <View style={styles.heroBadge}>
-            <View style={styles.heroBadgeDot} />
-            <Text style={styles.heroBadgeText}>Mindoro State University, Bongabong Campus</Text>
+        <ScrollView 
+          contentContainerStyle={{ 
+            flexGrow: 1, 
+            justifyContent: 'center',
+            paddingHorizontal: 24,
+            paddingVertical: 60,
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Logo Section */}
+          <View style={{ alignItems: 'center', marginBottom: 100 }}>
+            <View style={{
+              width: 90,
+              height: 90,
+              borderRadius: 45,
+              backgroundColor: '#ffffff',
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden',
+              borderWidth: 3,
+              borderColor: '#10b981',
+            }}>
+              <Image 
+                source={require('./assets/usg-logo.png')} 
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            </View>
           </View>
-          
-          {/* Large Logo */}
-          <View style={styles.heroLogoContainer}>
-            <Image 
-              source={require('./assets/usg-logo.png')} 
-              style={styles.heroLogo}
-              resizeMode="cover"
+
+          {/* Login Form */}
+          <View style={{ width: '100%' }}>
+            <TextInput
+              style={{ 
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#f0f2f5',
+                borderWidth: 1.5,
+                borderColor: '#10b981',
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 16,
+                fontSize: 15,
+                color: colors.text,
+                marginBottom: 12,
+              }}
+              placeholder="Email address"
+              placeholderTextColor={isDark ? '#8a8d91' : '#65676b'}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
+        
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#f0f2f5',
+              borderWidth: 1.5,
+              borderColor: '#10b981',
+              borderRadius: 12,
+              marginBottom: 20,
+            }}>
+              <TextInput
+                style={{ 
+                  flex: 1,
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  fontSize: 15,
+                  color: colors.text,
+                }}
+                placeholder="Password"
+                placeholderTextColor={isDark ? '#8a8d91' : '#65676b'}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity 
+                onPress={() => setShowPassword(!showPassword)}
+                style={{ paddingHorizontal: 16 }}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-off" : "eye"} 
+                  size={20} 
+                  color={isDark ? '#8a8d91' : '#65676b'}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity 
+              style={{
+                backgroundColor: '#10b981',
+                borderRadius: 25,
+                paddingVertical: 14,
+                alignItems: 'center',
+                marginBottom: 16,
+                width: '100%',
+              }}
+              onPress={handleQuickLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Log In</Text>
+              )}
+            </TouchableOpacity>
+
           </View>
-          
-          <Text style={styles.heroTitle}>
-            <Text style={styles.heroTitleGradient}>Attendance</Text>{'\n'}
-            for USG Events
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            Streamline event attendance with facial recognition and GPS-based check-in, all tracked in real time.
-          </Text>
-          
-          <TouchableOpacity style={styles.primaryButton} onPress={() => setShowLoginModal(true)}>
-            <View style={styles.buttonRow}>
-              <Ionicons name="lock-closed" size={16} color="#fff" />
-              <Text style={styles.primaryButtonText}>Sign In</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryButton} onPress={() => setShowRegisterModal(true)}>
-            <View style={styles.buttonRow}>
-              <Text style={styles.secondaryButtonText}>Register as Student</Text>
-              <Ionicons name="arrow-forward" size={16} color="#059669" />
-            </View>
-          </TouchableOpacity>
-        </View>
 
-        {/* Stats Strip */}
-        <View style={styles.statsStrip}>
-          {[
-            { value: '3+', label: 'Check-in Methods', icon: 'checkmark-circle' },
-            { value: '100%', label: 'Digital Records', icon: 'document-text' },
-            { value: 'Live', label: 'Real-Time Updates', icon: 'flash' },
-            { value: 'GPS', label: 'Location Verified', icon: 'location' },
-          ].map((stat) => (
-            <View key={stat.label} style={styles.statStripCard}>
-              <View style={styles.statStripIconBox}>
-                <Ionicons name={stat.icon} size={20} color="#fff" />
-              </View>
-              <View>
-                <Text style={styles.statStripValue}>{stat.value}</Text>
-                <Text style={styles.statStripLabel}>{stat.label}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Features */}
-        <View style={styles.featuresSection}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="star" size={24} color="#10b981" />
-            <Text style={styles.sectionTitle}>Everything You Need</Text>
+          {/* Register Section */}
+          <View style={{ width: '100%', alignItems: 'center', marginBottom: 50 }}>
+            <TouchableOpacity 
+              style={{
+                borderWidth: 1,
+                borderColor: '#10b981',
+                borderRadius: 25,
+                paddingVertical: 12,
+                width: '100%',
+                alignItems: 'center',
+              }}
+              onPress={() => setShowRegisterModal(true)}
+            >
+              <Text style={{ color: '#10b981', fontSize: 15, fontWeight: '500' }}>Create new account</Text>
+            </TouchableOpacity>
           </View>
-          {[
-            { title: 'Multi-Method Check-In', desc: 'Facial recognition and manual entry', icon: 'checkmark-circle', color: '#10b981' },
-            { title: 'Real-Time Monitoring', desc: 'Live attendance dashboard with instant updates', icon: 'flash', color: '#3b82f6' },
-            { title: 'GPS Verification', desc: 'Location-based validation ensures physical presence', icon: 'location', color: '#f97316' },
-            { title: 'Analytics & Reports', desc: 'Comprehensive reports with charts and graphs', icon: 'stats-chart', color: '#8b5cf6' },
-          ].map((feature) => (
-            <View key={feature.title} style={styles.featureCard}>
-              <View style={[styles.featureIconBox, { backgroundColor: feature.color + '20' }]}>
-                <Ionicons name={feature.icon} size={24} color={feature.color} />
-              </View>
-              <Text style={styles.featureTitle}>{feature.title}</Text>
-              <Text style={styles.featureDesc}>{feature.desc}</Text>
-            </View>
-          ))}
-        </View>
 
-        {/* CTA Banner */}
-        <View style={styles.ctaBanner}>
-          <Text style={styles.ctaTitle}>Join U-EventTrack Today</Text>
-          <Text style={styles.ctaSubtitle}>
-            Join Mindoro State University's digital attendance system for USG events.
-          </Text>
-          <TouchableOpacity style={styles.ctaPrimaryButton} onPress={() => setShowRegisterModal(true)}>
-            <View style={styles.buttonRow}>
-              <Text style={styles.ctaPrimaryButtonText}>Register as Student</Text>
-              <Ionicons name="arrow-forward" size={16} color="#059669" />
-            </View>
+          {/* Forgotten Password */}
+          <TouchableOpacity style={{ alignItems: 'center', paddingBottom: 40 }}>
+            <Text style={[{ fontSize: 15 }, { color: colors.text }]}>
+              Forgotten Password?
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.ctaSecondaryButton} onPress={() => setShowLoginModal(true)}>
-            <Text style={styles.ctaSecondaryButtonText}>Sign In</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            © {new Date().getFullYear()} Mindoro State University, Bongabong Campus
-          </Text>
-          <Text style={styles.footerTech}>Face ID · GPS</Text>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Login Modal */}
       <LoginModal 

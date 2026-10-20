@@ -1,0 +1,670 @@
+﻿import { useState, useEffect } from 'react';
+import { Calendar, LogIn, ArrowRight, Check, Zap, Shield, Users, Smartphone, QrCode, Eye, BarChart2, Star, ChevronRight, Sparkles } from 'lucide-react';
+import LoginModal from '../components/LoginModal';
+import StudentRegisterModal from '../components/StudentRegisterModal';
+import { getPublicAnnouncements } from '../api/announcementApi';
+
+const FALLBACK_ANNOUNCEMENTS = [
+  { id: 1, tag: 'Event', text: 'Campus Leadership Summit on April 5, 2026 at the Main Gymnasium' },
+  { id: 2, tag: 'Update', text: 'Face enrollment is now open. Visit the Face Enrollment page' },
+  { id: 3, tag: 'Info', text: 'U-EventTrack v2 is live! Enjoy all new features' },
+];
+
+export default function HomePage() {
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [announcements, setAnnouncements] = useState(FALLBACK_ANNOUNCEMENTS);
+  const [annIdx, setAnnIdx] = useState(0);
+
+  useEffect(() => {
+    getPublicAnnouncements()
+      .then(res => { if (res.data?.length) setAnnouncements(res.data); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (announcements.length <= 1) return;
+    const interval = setInterval(() => {
+      setAnnIdx(i => (i + 1) % announcements.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [announcements]);
+
+  const openLogin = () => { setRegisterOpen(false); setLoginOpen(true); };
+  const openRegister = () => { setLoginOpen(false); setRegisterOpen(true); };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Custom Fonts */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cal+Sans:wght@600&display=swap');
+        
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        
+        .font-display { font-family: 'Cal Sans', 'Inter', sans-serif; }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          33% { transform: translateY(-20px) rotate(2deg); }
+          66% { transform: translateY(-10px) rotate(-2deg); }
+        }
+        
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.3), 0 0 60px rgba(16, 185, 129, 0.1); }
+          50% { box-shadow: 0 0 50px rgba(16, 185, 129, 0.5), 0 0 80px rgba(16, 185, 129, 0.2); }
+        }
+        
+        .float-animation { animation: float 8s ease-in-out infinite; }
+        .glow-animation { animation: glow 3s ease-in-out infinite; }
+      `}</style>
+
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 p-[2px] shadow-lg">
+                <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center overflow-hidden p-0.5">
+                  <img src="/usg-logo.png" alt="USG" className="w-full h-full object-cover rounded-xl" />
+                </div>
+              </div>
+              <div>
+                <div className="font-bold text-lg text-gray-900 tracking-tight">U-EventTrack</div>
+                <div className="text-[10px] text-gray-500 font-medium tracking-wide">MinSU BONGABONG</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={openLogin} 
+                className="hidden sm:block px-5 py-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                Sign In
+              </button>
+              <button 
+                onClick={openRegister} 
+                className="group px-6 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/20 hover:shadow-gray-900/40 hover:scale-105 flex items-center gap-2"
+              >
+                Get Started
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6 lg:px-8 relative overflow-hidden">
+        {/* Background Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        
+        {/* Gradient Orbs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-green-400/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl" />
+        
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/60 rounded-full">
+                <Sparkles className="w-3.5 h-3.5 text-green-600" />
+                <span className="text-xs font-bold text-green-700 tracking-wide">SMART ATTENDANCE SYSTEM</span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-semibold text-gray-900 leading-[0.95] tracking-tight">
+                Attendance
+                <br />
+                <span className="bg-gradient-to-r from-green-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                  Reimagined
+                </span>
+              </h1>
+
+              {/* Subheading */}
+              <p className="text-xl text-gray-600 leading-relaxed max-w-lg font-medium">
+                The modern way to track student attendance at campus events with{' '}
+                <span className="text-gray-900 font-semibold">barcode scanning</span>,{' '}
+                <span className="text-gray-900 font-semibold">facial recognition</span>, and{' '}
+                <span className="text-gray-900 font-semibold">real-time analytics</span>.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
+                <button 
+                  onClick={openLogin}
+                  className="group px-8 py-4 bg-gray-900 text-white text-base font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-2xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:scale-105 flex items-center gap-3"
+                >
+                  <LogIn className="w-5 h-5" />
+                  Sign In Now
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button 
+                  onClick={openRegister}
+                  className="px-8 py-4 bg-white text-gray-900 text-base font-bold rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  Register as Student
+                </button>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center gap-6 pt-4">
+                {[
+                  { icon: <Check className="w-4 h-4" />, text: 'Real-time Tracking' },
+                  { icon: <Check className="w-4 h-4" />, text: '3 Check-in Methods' },
+                  { icon: <Check className="w-4 h-4" />, text: 'Mobile Ready' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                      {item.icon}
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right - Logo Display */}
+            <div className="hidden lg:flex justify-center items-center">
+              <div className="relative">
+                {/* Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 rounded-full blur-3xl opacity-30 glow-animation" />
+                
+                {/* Main Logo Container */}
+                <div className="relative float-animation">
+                  <div className="w-[420px] h-[420px] rounded-full bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 p-1 shadow-2xl">
+                    <div className="w-full h-full rounded-full bg-white p-8 flex items-center justify-center">
+                      <img 
+                        src="/usg-logo.png" 
+                        alt="USG Logo" 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Feature Cards */}
+                <div className="absolute -top-8 -left-8 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 float-animation" style={{ animationDelay: '0.5s' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+                      <QrCode className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-900">Barcode Scan</div>
+                      <div className="text-[10px] text-gray-500">Fast Check-in</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 float-animation" style={{ animationDelay: '1s' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                      <Eye className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-900">Face Recognition</div>
+                      <div className="text-[10px] text-gray-500">Touchless</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute top-1/2 -right-12 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 float-animation" style={{ animationDelay: '1.5s' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-900">Mobile App</div>
+                      <div className="text-[10px] text-gray-500">On-the-go</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="mt-20 grid grid-cols-3 gap-8 max-w-3xl">
+            {[
+              { value: '3', label: 'Check-in Methods', sublabel: 'Barcode, Face, Mobile' },
+              { value: '100%', label: 'Digital Records', sublabel: 'Paperless System' },
+              { value: 'Live', label: 'Real-time Updates', sublabel: 'Instant Sync' },
+            ].map((stat, i) => (
+              <div key={i} className="text-center">
+                <div className="text-5xl font-black bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-sm font-bold text-gray-900">{stat.label}</div>
+                <div className="text-xs text-gray-500 font-medium mt-0.5">{stat.sublabel}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="inline-block px-4 py-2 bg-gray-900 text-white rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+              Features
+            </div>
+            <h2 className="font-display text-5xl lg:text-6xl font-semibold text-gray-900 mb-6 tracking-tight">
+              Everything You Need
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-medium">
+              Modern tools designed for efficient campus-wide attendance management
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <QrCode className="w-7 h-7" />,
+                title: 'Barcode Scanning',
+                desc: 'Fast and reliable barcode-based check-in for quick student verification at events',
+                gradient: 'from-green-500 to-emerald-600',
+              },
+              {
+                icon: <Eye className="w-7 h-7" />,
+                title: 'Face Recognition',
+                desc: 'Touchless facial recognition attendance for maximum convenience and hygiene',
+                gradient: 'from-emerald-500 to-teal-600',
+              },
+              {
+                icon: <Smartphone className="w-7 h-7" />,
+                title: 'Mobile App',
+                desc: 'Native mobile application for students to check-in and view their attendance',
+                gradient: 'from-teal-500 to-cyan-600',
+              },
+              {
+                icon: <BarChart2 className="w-7 h-7" />,
+                title: 'Real-time Analytics',
+                desc: 'Live dashboards with attendance trends, insights, and detailed reports',
+                gradient: 'from-green-500 to-emerald-600',
+              },
+              {
+                icon: <Users className="w-7 h-7" />,
+                title: 'Student Management',
+                desc: 'Complete student database with course tracking and profile management',
+                gradient: 'from-emerald-500 to-teal-600',
+              },
+              {
+                icon: <Calendar className="w-7 h-7" />,
+                title: 'Event Management',
+                desc: 'Create and manage events with automated attendance tracking and notifications',
+                gradient: 'from-teal-500 to-cyan-600',
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border-2 border-gray-100 hover:border-transparent transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-300" 
+                  style={{ backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-stops))` }} />
+                
+                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed font-medium">{feature.desc}</p>
+                <ChevronRight className="w-5 h-5 text-gray-300 absolute bottom-8 right-8 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-24 px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="inline-block px-4 py-2 bg-gray-900 text-white rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+              How It Works
+            </div>
+            <h2 className="font-display text-5xl lg:text-6xl font-semibold text-gray-900 tracking-tight">
+              Get Started in 3 Steps
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-12">
+            {[
+              { step: '01', title: 'Create Event', desc: 'Set up your campus event with date, time, and location details in seconds' },
+              { step: '02', title: 'Check-in Students', desc: 'Students scan barcodes, use face recognition, or mobile app to check-in instantly' },
+              { step: '03', title: 'Track & Analyze', desc: 'View real-time attendance data and generate comprehensive reports automatically' },
+            ].map((item, i) => (
+              <div key={i} className="relative text-center">
+                {i < 2 && (
+                  <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-green-300 to-transparent" />
+                )}
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600 text-white text-3xl font-black mb-6 shadow-xl relative">
+                  {item.step}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600 blur-xl opacity-50" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
+                <p className="text-gray-600 leading-relaxed font-medium">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-6 lg:px-8 bg-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)] bg-[size:32px_32px]" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl" />
+        
+        <div className="max-w-4xl mx-auto text-center relative">
+          <h2 className="font-display text-5xl lg:text-6xl font-semibold text-white mb-6 tracking-tight">
+            Ready to Transform
+            <br />
+            Your Event Attendance?
+          </h2>
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto font-medium">
+            Join MinSU Bongabong Campus in modernizing event management with U-EventTrack
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={openLogin}
+              className="group w-full sm:w-auto px-8 py-4 bg-white text-gray-900 text-lg font-bold rounded-2xl hover:bg-gray-100 transition-all shadow-2xl hover:scale-105 flex items-center justify-center gap-3"
+            >
+              <LogIn className="w-5 h-5" />
+              Get Started Today
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={openRegister}
+              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm text-white text-lg font-bold rounded-2xl border-2 border-white/20 hover:bg-white/20 transition-all"
+            >
+              Register as Student
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black text-gray-500 py-12 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 p-[2px]">
+                <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center overflow-hidden p-0.5">
+                  <img src="/usg-logo.png" alt="USG" className="w-full h-full object-cover rounded-xl" />
+                </div>
+              </div>
+              <span className="text-xl font-bold text-white tracking-tight">U-EventTrack</span>
+            </div>
+            <p className="text-sm font-medium">Modern attendance tracking for campus events</p>
+            <p className="text-sm">© {new Date().getFullYear()} MinSU Bongabong Campus. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Modals */}
+      <LoginModal 
+        open={loginOpen} 
+        onClose={() => setLoginOpen(false)}
+        onSwitchToRegister={openRegister}
+      />
+      <StudentRegisterModal 
+        open={registerOpen} 
+        onClose={() => setRegisterOpen(false)}
+        onSwitchToLogin={openLogin}
+      />
+    </div>
+  );
+}
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 p-0.5">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <img src="/usg-logo.png" alt="USG" className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <div>
+                <div className="font-bold text-lg text-gray-900">U-EventTrack</div>
+                <div className="text-xs text-gray-500">MinSU Bongabong</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={openLogin} className="hidden sm:block px-5 py-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">
+                Sign In
+              </button>
+              <button onClick={openRegister} className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm font-bold rounded-full hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:scale-105">
+                Get Started
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6 lg:px-8 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl" />
+        
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
+              <Star className="w-4 h-4 text-green-600 fill-green-600" />
+              <span className="text-sm font-semibold text-green-700">Smart Event Attendance System</span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 leading-tight tracking-tight">
+              Attendance Made
+              <span className="block mt-2 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                Simple & Smart
+              </span>
+            </h1>
+
+            {/* Subheading */}
+            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+              Track student attendance at campus events effortlessly with barcode scanning, facial recognition, and real-time analytics.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <button 
+                onClick={openLogin}
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-bold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-5 h-5" />
+                Sign In Now
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={openRegister}
+                className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 text-lg font-bold rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-lg"
+              >
+                Register as Student
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 pt-12 max-w-2xl mx-auto">
+              {[
+                { value: '3', label: 'Check-in Methods' },
+                { value: '100%', label: 'Digital Records' },
+                { value: 'Real-time', label: 'Live Updates' },
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-4xl font-black text-gray-900">{stat.value}</div>
+                  <div className="text-sm font-medium text-gray-600 mt-1">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-bold uppercase tracking-wider mb-4">
+              Features
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+              Everything You Need
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Modern tools designed for efficient campus-wide attendance management
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <QrCode className="w-8 h-8" />,
+                title: 'Barcode Scanning',
+                desc: 'Fast and reliable barcode-based check-in for quick student verification',
+                color: 'green',
+              },
+              {
+                icon: <Eye className="w-8 h-8" />,
+                title: 'Face Recognition',
+                desc: 'Touchless facial recognition attendance for maximum convenience',
+                color: 'emerald',
+              },
+              {
+                icon: <Smartphone className="w-8 h-8" />,
+                title: 'Mobile App',
+                desc: 'Native mobile app for students to check-in and view attendance',
+                color: 'teal',
+              },
+              {
+                icon: <BarChart2 className="w-8 h-8" />,
+                title: 'Real-time Analytics',
+                desc: 'Live dashboards with attendance trends and detailed insights',
+                color: 'green',
+              },
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: 'Student Management',
+                desc: 'Complete student database with course and year tracking',
+                color: 'emerald',
+              },
+              {
+                icon: <Calendar className="w-8 h-8" />,
+                title: 'Event Management',
+                desc: 'Create and manage events with automated attendance tracking',
+                color: 'teal',
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl border-2 border-gray-100 hover:border-green-200 transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className={`inline-flex p-4 rounded-2xl bg-${feature.color}-100 text-${feature.color}-600 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+                <ChevronRight className="w-5 h-5 text-gray-400 absolute bottom-8 right-8 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-20 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-bold uppercase tracking-wider mb-4">
+              How It Works
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+              Get Started in 3 Steps
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: '01', title: 'Create Event', desc: 'Set up your campus event with date, time, and location details' },
+              { step: '02', title: 'Check-in Students', desc: 'Students scan barcodes, use face recognition, or mobile app to check-in' },
+              { step: '03', title: 'Track & Analyze', desc: 'View real-time attendance data and generate detailed reports' },
+            ].map((item, i) => (
+              <div key={i} className="relative">
+                {i < 2 && (
+                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-green-300 to-emerald-300 -z-10" />
+                )}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white text-2xl font-black mb-6 shadow-lg shadow-green-500/30">
+                    {item.step}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-6 lg:px-8 bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-40" />
+        <div className="max-w-4xl mx-auto text-center relative">
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">
+            Ready to Modernize Your
+            <br />
+            Event Attendance?
+          </h2>
+          <p className="text-xl text-green-50 mb-8 max-w-2xl mx-auto">
+            Join MinSU Bongabong Campus in streamlining event management with U-EventTrack
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={openLogin}
+              className="w-full sm:w-auto px-8 py-4 bg-white text-green-700 text-lg font-bold rounded-2xl hover:bg-gray-50 transition-all shadow-2xl hover:scale-105 flex items-center justify-center gap-2"
+            >
+              <LogIn className="w-5 h-5" />
+              Get Started Today
+            </button>
+            <button
+              onClick={openRegister}
+              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm text-white text-lg font-bold rounded-2xl border-2 border-white/30 hover:bg-white/20 transition-all"
+            >
+              Register as Student
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 p-0.5">
+              <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                <img src="/usg-logo.png" alt="USG" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <span className="text-xl font-bold text-white">U-EventTrack</span>
+          </div>
+          <p className="text-sm mb-8">Modern attendance tracking for campus events</p>
+          <p className="text-sm">© {new Date().getFullYear()} MinSU Bongabong Campus. All rights reserved.</p>
+        </div>
+      </footer>
+
+      {/* Modals */}
+      <LoginModal 
+        open={loginOpen} 
+        onClose={() => setLoginOpen(false)}
+        onSwitchToRegister={openRegister}
+      />
+      <StudentRegisterModal 
+        open={registerOpen} 
+        onClose={() => setRegisterOpen(false)}
+        onSwitchToLogin={openLogin}
+      />
+    </div>
+  );
+}

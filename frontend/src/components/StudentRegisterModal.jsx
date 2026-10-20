@@ -40,7 +40,7 @@ export default function StudentRegisterModal({ open, onClose, onSwitchToLogin })
     <Modal open={open} onClose={onClose} maxWidth="max-w-xl">
       {/* Simple Green Header */}
       <div className="bg-green-600 rounded-t-2xl px-6 py-6 text-center">
-        <div className="w-16 h-16 rounded-2xl overflow-hidden border-4 border-white/30 shadow-xl mx-auto mb-3 bg-white/10">
+        <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/30 shadow-xl mx-auto mb-3 bg-white">
           <img src="/usg-logo.png" alt="USG Logo" className="w-full h-full object-cover" />
         </div>
         <h2 className="text-xl font-black text-white mb-0.5">Create Account</h2>

@@ -1402,4 +1402,81 @@ export const styles = createStyles({
   inputBackground: '#ffffff',
   inputBorder: '#10b981',
   placeholder: '#6b7280',
+
+  // Centered Login Page Styles
+  centeredLogoSection: {
+    alignItems: 'center',
+    marginBottom: 60,
+  },
+  centeredInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 15,
+    marginBottom: 12,
+  },
+  centeredPasswordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  centeredPasswordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 15,
+  },
+  centeredPasswordToggle: {
+    paddingHorizontal: 16,
+  },
+  centeredLoginButton: {
+    backgroundColor: '#10b981',
+    borderRadius: 25,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  centeredLoginButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  centeredForgotPassword: {
+    alignItems: 'center',
+    marginBottom: 80,
+  },
+  centeredForgotPasswordText: {
+    fontSize: 15,
+  },
+  centeredRegisterSection: {
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 0,
+    borderTopWidth: 0,
+  },
+  centeredRegisterButton: {
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    width: '100%',
+    alignItems: 'center',
+  },
+  centeredRegisterButtonText: {
+    color: '#10b981',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  centeredFooter: {
+    marginTop: 32,
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  centeredFooterText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
 });

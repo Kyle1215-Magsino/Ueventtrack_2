@@ -25,14 +25,12 @@ export default function BarcodeScanner({ visible, onClose, onScan, token }) {
     setScanned(true);
     setProcessing(true);
 
-    // Call the onScan callback with the scanned data
     try {
       await onScan(data);
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to process barcode');
     } finally {
       setProcessing(false);
-      // Auto close after successful scan
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -60,7 +58,7 @@ export default function BarcodeScanner({ visible, onClose, onScan, token }) {
     return (
       <Modal visible={visible} animationType="slide" transparent={false}>
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <Ionicons name="camera-off" size={64} color="#ef4444" />
+          <Ionicons name="camera-outline" size={64} color="#ef4444" />
           <Text style={[styles.text, { color: colors.text, marginTop: 20 }]}>
             Camera permission is required to scan barcodes
           </Text>
@@ -78,56 +76,68 @@ export default function BarcodeScanner({ visible, onClose, onScan, token }) {
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
       <View style={styles.scannerContainer}>
-        <CameraView
-          style={StyleSheet.absoluteFillObject}
-          facing="back"
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr', 'code128', 'code39', 'ean13', 'ean8'],
-          }}
-        />
+        {visible && permission?.granted ? (
+          <>
+            <CameraView
+              style={StyleSheet.absoluteFillObject}
+              facing="back"
+              barcodeScannerSettings={{
+                barcodeTypes: ['qr', 'code128', 'code39', 'ean13', 'ean8'],
+              }}
+              onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            />
+            
+            {/* Overlay on top of camera */}
+            <View style={styles.overlay}>
+              {/* Top Bar */}
+              <View style={styles.topBar}>
+                <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+                  <Ionicons name="close" size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.title}>Scan Barcode</Text>
+                <View style={{ width: 40 }} />
+              </View>
 
-        {/* Overlay */}
-        <View style={styles.overlay}>
-          {/* Top Bar */}
-          <View style={styles.topBar}>
-            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-              <Ionicons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.title}>Scan Barcode</Text>
-            <View style={{ width: 40 }} />
-          </View>
+              {/* Scanner Frame */}
+              <View style={styles.scannerFrame}>
+                <View style={styles.frameCorner} />
+                <View style={[styles.frameCorner, styles.frameCornerTopRight]} />
+                <View style={[styles.frameCorner, styles.frameCornerBottomLeft]} />
+                <View style={[styles.frameCorner, styles.frameCornerBottomRight]} />
+              </View>
 
-          {/* Scanner Frame */}
-          <View style={styles.scannerFrame}>
-            <View style={styles.frameCorner} />
-            <View style={[styles.frameCorner, styles.frameCornerTopRight]} />
-            <View style={[styles.frameCorner, styles.frameCornerBottomLeft]} />
-            <View style={[styles.frameCorner, styles.frameCornerBottomRight]} />
+              {/* Instructions */}
+              <View style={styles.instructionsContainer}>
+                {processing ? (
+                  <>
+                    <ActivityIndicator size="large" color="#10b981" />
+                    <Text style={styles.instructions}>Processing...</Text>
+                  </>
+                ) : scanned ? (
+                  <>
+                    <Ionicons name="checkmark-circle" size={48} color="#10b981" />
+                    <Text style={styles.instructions}>Barcode Scanned!</Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="qr-code-outline" size={48} color="#fff" />
+                    <Text style={styles.instructions}>
+                      Position the barcode within the frame
+                    </Text>
+                    <Text style={[styles.instructions, { fontSize: 12, marginTop: 10 }]}>
+                      {visible && permission?.granted ? 'Camera Active' : 'Camera Initializing...'}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+          </>
+        ) : (
+          <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <ActivityIndicator size="large" color="#10b981" />
+            <Text style={[styles.text, { color: colors.text }]}>Initializing camera...</Text>
           </View>
-
-          {/* Instructions */}
-          <View style={styles.instructionsContainer}>
-            {processing ? (
-              <>
-                <ActivityIndicator size="large" color="#10b981" />
-                <Text style={styles.instructions}>Processing...</Text>
-              </>
-            ) : scanned ? (
-              <>
-                <Ionicons name="checkmark-circle" size={48} color="#10b981" />
-                <Text style={styles.instructions}>Barcode Scanned!</Text>
-              </>
-            ) : (
-              <>
-                <Ionicons name="qr-code-outline" size={48} color="#fff" />
-                <Text style={styles.instructions}>
-                  Position the barcode within the frame
-                </Text>
-              </>
-            )}
-          </View>
-        </View>
+        )}
       </View>
     </Modal>
   );

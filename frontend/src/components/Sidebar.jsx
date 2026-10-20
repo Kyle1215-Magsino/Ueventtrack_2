@@ -52,7 +52,7 @@ export default function Sidebar({ onNavigate }) {
       {/* Logo */}
       <div className="px-5 h-16 flex items-center border-b border-green-200 dark:border-gray-800 flex-shrink-0 animate-fadeIn">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-white border-2 border-green-600">
             <img 
               src="/usg-logo.png" 
               alt="USG Logo" 

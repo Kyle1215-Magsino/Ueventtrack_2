@@ -109,14 +109,34 @@ export default function DashboardPage() {
             key={card.key}
             onClick={() => navigate(card.href)}
             style={{ animationDelay: `${i * 0.07}s` }}
-            className="animate-staggerIn bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-green-300 dark:border-gray-800 hover:shadow-md hover:-translate-y-0.5 hover:border-green-400 dark:hover:border-gray-700 transition-all duration-200 text-left w-full cursor-pointer"
+            className="group animate-staggerIn bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-lg border-2 border-green-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-green-600 transition-all duration-200 text-left w-full cursor-pointer relative overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className={`${card.iconBg} ${card.iconColor} dark:bg-opacity-20 rounded-lg p-2.5`}>{card.icon}</span>
-              <svg className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            {/* Gradient background on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent dark:from-green-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            
+            <div className="relative">
+              {/* Icon and Arrow */}
+              <div className="flex items-start justify-between mb-4">
+                <div className={`${card.iconBg} ${card.iconColor} dark:bg-opacity-20 rounded-xl p-3 shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-200`}>
+                  {card.icon}
+                </div>
+                <svg className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-green-500 dark:group-hover:text-green-400 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              
+              {/* Value */}
+              <div className="mb-2">
+                <p className="text-4xl font-black text-gray-900 dark:text-white tracking-tight group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200">
+                  {data[card.key]}
+                </p>
+              </div>
+              
+              {/* Label */}
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
+                {card.label}
+              </p>
             </div>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">{data[card.key]}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{card.label}</p>
           </button>
         ))}
       </div>
