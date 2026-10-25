@@ -27,6 +27,10 @@ import StudentEventsPage from './pages/StudentEventsPage';
 import EventAnalyticsPage from './pages/EventAnalyticsPage';
 import EventViewPage from './pages/EventViewPage';
 import EventEditPage from './pages/EventEditPage';
+import OfficerRegisterPage from './pages/OfficerRegisterPage';
+import OfficerRegisterSuccessPage from './pages/OfficerRegisterSuccessPage';
+import OfficerRegistrationsPage from './pages/OfficerRegistrationsPage';
+import GoogleCallbackPage from './pages/GoogleCallbackPage';
 
 export default function App() {
   return (
@@ -37,6 +41,9 @@ export default function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/officer-register" element={<OfficerRegisterPage />} />
+              <Route path="/officer-register-success" element={<OfficerRegisterSuccessPage />} />
+              <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
               {/* Officer/Admin routes */}
               <Route element={
@@ -59,6 +66,7 @@ export default function App() {
                 <Route path="/users" element={<UsersPage />} />
                 <Route path="/audit-logs" element={<AuditLogPage />} />
                 <Route path="/announcements" element={<AnnouncementsPage />} />
+                <Route path="/officer-registrations" element={<OfficerRegistrationsPage />} />
               </Route>
 
               {/* Student routes */}

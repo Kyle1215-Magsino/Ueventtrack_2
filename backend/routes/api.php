@@ -19,6 +19,15 @@ Route::post('/mobile/login', [AuthController::class, 'mobileLogin']);
 Route::post('/register-student', [AuthController::class, 'registerStudent']);
 Route::get('/announcements/public', [AnnouncementController::class, 'public']);
 
+// Google OAuth routes
+Route::get('/auth/google', [\App\Http\Controllers\GoogleAuthController::class, 'getGoogleAuthUrl']);
+Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'handleGoogleCallback']);
+
+// Officer registration (public)
+Route::post('/officer/register', [\App\Http\Controllers\OfficerRegistrationController::class, 'register']);
+Route::get('/officer/verify-email/{token}', [\App\Http\Controllers\OfficerRegistrationController::class, 'verifyEmail']);
+Route::post('/officer/resend-verification', [\App\Http\Controllers\OfficerRegistrationController::class, 'resendVerification']);
+
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
@@ -113,6 +122,12 @@ Route::middleware('auth:sanctum')->group(function () {
                 \App\Services\EventAnnouncementService::syncAllEventAnnouncements();
                 return response()->json(['message' => 'Event announcements synced successfully.']);
             });
+
+            // Officer Registration Management (admin only)
+            Route::get('/officer-registrations', [\App\Http\Controllers\OfficerRegistrationController::class, 'getAllRegistrations']);
+            Route::get('/officer-registrations/pending', [\App\Http\Controllers\OfficerRegistrationController::class, 'getPendingRegistrations']);
+            Route::post('/officer-registrations/{id}/approve', [\App\Http\Controllers\OfficerRegistrationController::class, 'approve']);
+            Route::post('/officer-registrations/{id}/reject', [\App\Http\Controllers\OfficerRegistrationController::class, 'reject']);
         });
     });
 

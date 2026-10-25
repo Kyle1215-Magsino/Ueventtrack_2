@@ -21,6 +21,20 @@ export default function StudentsPage() {
   const [restoreId, setRestoreId] = useState(null);
   const [restoring, setRestoring] = useState(false);
   const [search, setSearch] = useState('');
+  const [collegeFilter, setCollegeFilter] = useState('all');
+  const [programFilter, setProgramFilter] = useState('all');
+
+  // Define college structure
+  const collegePrograms = {
+    'CBM': ['BSHM', 'BSENTREP', 'BSTOURISM'],
+    'CCS': ['BSIT', 'BSCPE'],
+    'CTE': ['BSEDUC', 'BSCRIM', 'BSPOLSCI', 'BSFI']
+  };
+
+  // Get programs based on selected college
+  const programs = collegeFilter === 'all'
+    ? [...new Set([...students, ...archived].map(s => s.course).filter(Boolean))]
+    : collegePrograms[collegeFilter] || [];
 
   const fetchAll = () => {
     console.log('Fetching students...');
@@ -101,15 +115,59 @@ export default function StudentsPage() {
     )},
   ];
 
+  // Filter active students by college and program
+  const filteredStudents = students.filter(student => {
+    const studentCourse = student.course;
+    
+    // College filter
+    if (collegeFilter !== 'all') {
+      const collegeProgramsList = collegePrograms[collegeFilter] || [];
+      if (!collegeProgramsList.includes(studentCourse)) {
+        return false;
+      }
+    }
+    
+    // Program filter
+    if (programFilter !== 'all') {
+      if (studentCourse !== programFilter) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
   const filteredArchived = archived.filter(s => {
+    const studentCourse = s.course;
     const q = search.toLowerCase();
-    return (
+    
+    // Search filter
+    const matchesSearch = (
       s.student_id?.toLowerCase().includes(q) ||
       s.first_name?.toLowerCase().includes(q) ||
       s.last_name?.toLowerCase().includes(q) ||
       s.email?.toLowerCase().includes(q) ||
       s.course?.toLowerCase().includes(q)
     );
+
+    if (!matchesSearch) return false;
+
+    // College filter
+    if (collegeFilter !== 'all') {
+      const collegeProgramsList = collegePrograms[collegeFilter] || [];
+      if (!collegeProgramsList.includes(studentCourse)) {
+        return false;
+      }
+    }
+    
+    // Program filter
+    if (programFilter !== 'all') {
+      if (studentCourse !== programFilter) {
+        return false;
+      }
+    }
+    
+    return true;
   });
 
   return (
@@ -162,15 +220,55 @@ export default function StudentsPage() {
           {/* Active tab */}
           {tab === 'active' && (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-green-300 dark:border-gray-800 p-5">
-              <DataTable columns={activeColumns} data={students} />
+              {/* College and Program Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">College</label>
+                  <select
+                    value={collegeFilter}
+                    onChange={(e) => {
+                      setCollegeFilter(e.target.value);
+                      setProgramFilter('all');
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="all">All Colleges</option>
+                    <option value="CBM">CBM - College of Business and Management</option>
+                    <option value="CCS">CCS - College of Computer Studies</option>
+                    <option value="CTE">CTE - College of Teacher Education</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Program</label>
+                  <select
+                    value={programFilter}
+                    onChange={(e) => setProgramFilter(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="all">All Programs</option>
+                    {programs.map(program => (
+                      <option key={program} value={program}>{program}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Results count */}
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Showing {filteredStudents.length} of {students.length} students
+              </div>
+
+              <DataTable columns={activeColumns} data={filteredStudents} />
             </div>
           )}
 
           {/* Archived tab */}
           {tab === 'archived' && (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-orange-200 dark:border-gray-800 overflow-hidden">
-              {/* Search */}
-              <div className="p-4 border-b border-orange-100 dark:border-gray-800">
+              {/* Filters Section */}
+              <div className="p-4 border-b border-orange-100 dark:border-gray-800 space-y-4">
+                {/* Search */}
                 <div className="relative max-w-sm">
                   <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -182,6 +280,45 @@ export default function StudentsPage() {
                     onChange={e => setSearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-orange-200 dark:border-gray-700 rounded-xl bg-orange-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 text-sm focus:ring-2 focus:ring-orange-300 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   />
+                </div>
+
+                {/* College and Program Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">College</label>
+                    <select
+                      value={collegeFilter}
+                      onChange={(e) => {
+                        setCollegeFilter(e.target.value);
+                        setProgramFilter('all');
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="all">All Colleges</option>
+                      <option value="CBM">CBM - College of Business and Management</option>
+                      <option value="CCS">CCS - College of Computer Studies</option>
+                      <option value="CTE">CTE - College of Teacher Education</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Program</label>
+                    <select
+                      value={programFilter}
+                      onChange={(e) => setProgramFilter(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="all">All Programs</option>
+                      {programs.map(program => (
+                        <option key={program} value={program}>{program}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Results count */}
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing {filteredArchived.length} of {archived.length} archived students
                 </div>
               </div>
 

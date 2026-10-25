@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight } from 'lucide-react';
 import Modal from './Modal';
+import GoogleSignInButton from './GoogleSignInButton';
 
 export default function LoginModal({ open, onClose, onSwitchToRegister }) {
   const [form, setForm] = useState({ email: '', password: '', remember: false });
@@ -99,6 +100,19 @@ export default function LoginModal({ open, onClose, onSwitchToRegister }) {
           </button>
         </form>
 
+        {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 font-medium">Or continue with</span>
+          </div>
+        </div>
+
+        {/* Google Sign In */}
+        <GoogleSignInButton className="w-full" />
+
         <div className="mt-5 pt-5 border-t-2 border-green-300 dark:border-gray-800">
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
@@ -112,3 +126,4 @@ export default function LoginModal({ open, onClose, onSwitchToRegister }) {
     </Modal>
   );
 }
+

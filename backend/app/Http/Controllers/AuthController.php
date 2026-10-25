@@ -222,6 +222,9 @@ class AuthController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'nullable|in:officer,admin',
+            'student_id' => 'nullable|string|max:50',
+            'usg_position' => 'nullable|string|max:255',
+            'reason' => 'nullable|string|max:1000',
         ]);
 
         $user = User::create([
@@ -229,9 +232,10 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role ?? 'officer',
+            'usg_position' => $request->usg_position,
         ]);
 
-        AuditLog::record('created', "Created account for {$user->name} ({$user->role})", 'User', $user->id, $request->user()?->id, $request->ip());
+        AuditLog::record('created', "Created account for {$user->name} ({$user->role})" . ($request->usg_position ? " - {$request->usg_position}" : ''), 'User', $user->id, $request->user()?->id, $request->ip());
 
         return response()->json(['user' => $user, 'message' => 'Account created.'], 201);
     }

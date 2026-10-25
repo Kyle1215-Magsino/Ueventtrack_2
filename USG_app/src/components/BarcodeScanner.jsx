@@ -1,71 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
 
-export default function BarcodeScanner({ visible, onClose, onScan, token }) {
-  const { colors } = useTheme();
+function BarcodeScanner({ visible, onClose, onScan }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setScanned(false);
-      if (!permission?.granted) {
-        requestPermission();
-      }
     }
   }, [visible]);
 
-  const handleBarCodeScanned = async ({ type, data }) => {
-    if (scanned || processing) return;
-    
+  const handleScan = async ({ data }) => {
+    if (scanned) return;
     setScanned(true);
-    setProcessing(true);
-
+    
     try {
       await onScan(data);
+      setTimeout(() => onClose(), 1000);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to process barcode');
-    } finally {
-      setProcessing(false);
-      setTimeout(() => {
-        onClose();
-      }, 1500);
+      Alert.alert('Error', error.message);
+      setScanned(false);
     }
   };
 
-  const handleClose = () => {
-    setScanned(false);
-    setProcessing(false);
-    onClose();
-  };
+  if (!visible) {
+    return null;
+  }
 
   if (!permission) {
-    return (
-      <Modal visible={visible} animationType="slide" transparent={false}>
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <ActivityIndicator size="large" color="#10b981" />
-          <Text style={[styles.text, { color: colors.text }]}>Loading camera...</Text>
-        </View>
-      </Modal>
-    );
+    return null;
   }
 
   if (!permission.granted) {
     return (
-      <Modal visible={visible} animationType="slide" transparent={false}>
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <Ionicons name="camera-outline" size={64} color="#ef4444" />
-          <Text style={[styles.text, { color: colors.text, marginTop: 20 }]}>
-            Camera permission is required to scan barcodes
-          </Text>
+      <Modal visible={true} animationType="slide">
+        <View style={styles.center}>
+          <Text style={styles.errorText}>Need camera permission</Text>
           <TouchableOpacity style={styles.button} onPress={requestPermission}>
             <Text style={styles.buttonText}>Grant Permission</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, { backgroundColor: '#6b7280', marginTop: 10 }]} onPress={handleClose}>
+          <TouchableOpacity style={[styles.button, { marginTop: 10, backgroundColor: '#666' }]} onPress={onClose}>
             <Text style={styles.buttonText}>Close</Text>
           </TouchableOpacity>
         </View>
@@ -74,70 +51,34 @@ export default function BarcodeScanner({ visible, onClose, onScan, token }) {
   }
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false}>
-      <View style={styles.scannerContainer}>
-        {visible && permission?.granted ? (
-          <>
-            <CameraView
-              style={StyleSheet.absoluteFillObject}
-              facing="back"
-              barcodeScannerSettings={{
-                barcodeTypes: ['qr', 'code128', 'code39', 'ean13', 'ean8'],
-              }}
-              onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-            />
-            
-            {/* Overlay on top of camera */}
-            <View style={styles.overlay}>
-              {/* Top Bar */}
-              <View style={styles.topBar}>
-                <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-                  <Ionicons name="close" size={28} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.title}>Scan Barcode</Text>
-                <View style={{ width: 40 }} />
-              </View>
+    <Modal visible={true} animationType="slide">
+      <View style={styles.container}>
+        <CameraView
+          style={styles.camera}
+          facing="back"
+          onBarcodeScanned={scanned ? undefined : handleScan}
+        />
+        
+        {/* Overlays on top */}
+        <View style={styles.topBar}>
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+            <Ionicons name="close" size={32} color="white" />
+          </TouchableOpacity>
+        </View>
 
-              {/* Scanner Frame */}
-              <View style={styles.scannerFrame}>
-                <View style={styles.frameCorner} />
-                <View style={[styles.frameCorner, styles.frameCornerTopRight]} />
-                <View style={[styles.frameCorner, styles.frameCornerBottomLeft]} />
-                <View style={[styles.frameCorner, styles.frameCornerBottomRight]} />
-              </View>
+        {/* Scanning Frame */}
+        <View style={styles.scannerFrame}>
+          <View style={styles.frameCorner} />
+          <View style={[styles.frameCorner, styles.topRight]} />
+          <View style={[styles.frameCorner, styles.bottomLeft]} />
+          <View style={[styles.frameCorner, styles.bottomRight]} />
+        </View>
 
-              {/* Instructions */}
-              <View style={styles.instructionsContainer}>
-                {processing ? (
-                  <>
-                    <ActivityIndicator size="large" color="#10b981" />
-                    <Text style={styles.instructions}>Processing...</Text>
-                  </>
-                ) : scanned ? (
-                  <>
-                    <Ionicons name="checkmark-circle" size={48} color="#10b981" />
-                    <Text style={styles.instructions}>Barcode Scanned!</Text>
-                  </>
-                ) : (
-                  <>
-                    <Ionicons name="qr-code-outline" size={48} color="#fff" />
-                    <Text style={styles.instructions}>
-                      Position the barcode within the frame
-                    </Text>
-                    <Text style={[styles.instructions, { fontSize: 12, marginTop: 10 }]}>
-                      {visible && permission?.granted ? 'Camera Active' : 'Camera Initializing...'}
-                    </Text>
-                  </>
-                )}
-              </View>
-            </View>
-          </>
-        ) : (
-          <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <ActivityIndicator size="large" color="#10b981" />
-            <Text style={[styles.text, { color: colors.text }]}>Initializing camera...</Text>
-          </View>
-        )}
+        <View style={styles.bottomBar}>
+          <Text style={styles.text}>
+            {scanned ? '✓ Scanned!' : 'Point at barcode'}
+          </Text>
+        </View>
       </View>
     </Modal>
   );
@@ -146,106 +87,109 @@ export default function BarcodeScanner({ visible, onClose, onScan, token }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
-  text: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  button: {
-    marginTop: 30,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    backgroundColor: '#10b981',
-    borderRadius: 12,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  scannerContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
+  camera: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    zIndex: 10,
   },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+  closeBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    justifyContent: 'center',
   },
   scannerFrame: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    position: 'absolute',
+    top: '30%',
+    left: '10%',
+    right: '10%',
+    height: 250,
   },
   frameCorner: {
     position: 'absolute',
     width: 60,
     height: 60,
     borderColor: '#10b981',
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    top: '30%',
-    left: '15%',
+    borderWidth: 0,
+    top: 0,
+    left: 0,
+    borderTopWidth: 5,
+    borderLeftWidth: 5,
   },
-  frameCornerTopRight: {
-    borderTopWidth: 4,
-    borderLeftWidth: 0,
-    borderRightWidth: 4,
+  topRight: {
     left: 'auto',
-    right: '15%',
+    right: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 5,
   },
-  frameCornerBottomLeft: {
-    borderTopWidth: 0,
-    borderBottomWidth: 4,
+  bottomLeft: {
     top: 'auto',
-    bottom: '30%',
+    bottom: 0,
+    borderTopWidth: 0,
+    borderBottomWidth: 5,
   },
-  frameCornerBottomRight: {
+  bottomRight: {
+    top: 'auto',
+    bottom: 0,
+    left: 'auto',
+    right: 0,
     borderTopWidth: 0,
     borderLeftWidth: 0,
-    borderRightWidth: 4,
-    borderBottomWidth: 4,
-    top: 'auto',
-    bottom: '30%',
-    left: 'auto',
-    right: '15%',
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
   },
-  instructionsContainer: {
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 40,
+    backgroundColor: 'rgba(0,0,0,0.8)',
     alignItems: 'center',
-    paddingVertical: 40,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  instructions: {
+  text: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  button: {
+    padding: 15,
+    backgroundColor: '#10b981',
+    borderRadius: 10,
+    minWidth: 150,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
     fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 16,
-    paddingHorizontal: 40,
   },
 });
+
+export default BarcodeScanner;
