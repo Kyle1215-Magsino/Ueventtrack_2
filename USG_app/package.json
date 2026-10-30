@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx expo start --offline",
-    "android": "npx expo start --android --offline",
-    "ios": "npx expo start --ios --offline",
-    "web": "npx expo start --web"
+    "start": "expo start --offline",
+    "android": "expo start --android --offline",
+    "ios": "expo start --ios --offline",
+    "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
