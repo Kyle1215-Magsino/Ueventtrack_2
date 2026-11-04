@@ -6,7 +6,7 @@ import axios from 'axios';
 // - Mac/Linux: Run 'ifconfig' in Terminal, look for inet address
 // - Make sure your phone and computer are on the same WiFi network
 // - Your Laravel backend should be running on port 8000
-export const API_BASE_URL = 'http://192.168.1.15:8000/api';
+export const API_BASE_URL = 'http://10.54.162.26:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

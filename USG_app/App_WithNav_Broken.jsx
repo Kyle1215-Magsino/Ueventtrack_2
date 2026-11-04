@@ -11,7 +11,7 @@ import StudentDashboardScreen from './src/screens/StudentDashboardScreen_New';
 const Stack = createNativeStackNavigator();
 
 // Update this to your backend IP address
-const API_URL = 'http://192.168.1.15:8000/api';
+const API_URL = 'http://10.54.162.26:8000/api';
 
 // Auth Context
 const AuthContext = React.createContext();

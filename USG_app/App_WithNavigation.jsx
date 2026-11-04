@@ -10,7 +10,7 @@ import StudentEventsScreen from './src/screens/StudentEventsScreen_New';
 import StudentAttendanceScreen from './src/screens/StudentAttendanceScreen_New';
 
 const Stack = createNativeStackNavigator();
-const API_URL = 'http://192.168.1.15:8000/api';
+const API_URL = 'http://10.54.162.26:8000/api';
 
 // Auth Context
 const AuthContext = React.createContext();

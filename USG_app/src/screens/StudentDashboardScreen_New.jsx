@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { useAuth } from '../../App';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.15:8000/api';
+const API_URL = 'http://10.54.162.26:8000/api';
 
 export default function StudentDashboardScreen({ navigation }) {
   const { user, logout } = useAuth();
