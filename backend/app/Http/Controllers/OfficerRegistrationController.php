@@ -31,6 +31,41 @@ class OfficerRegistrationController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // Check if position is already taken by an active officer (term not finished)
+        $positionTaken = User::where('usg_position', $validated['usg_position'])
+            ->whereNotNull('usg_position')
+            ->where(function ($query) {
+                // Position is taken if:
+                // 1. No term_end date set (indefinite term)
+                // 2. OR term_end date is in the future (term not finished)
+                $query->whereNull('term_end')
+                      ->orWhere('term_end', '>=', now()->toDateString());
+            })
+            ->exists();
+
+        if ($positionTaken) {
+            return response()->json([
+                'message' => 'This position is currently occupied. Please wait until the current officer\'s term is finished.',
+                'errors' => [
+                    'usg_position' => ['The ' . $validated['usg_position'] . ' position is already taken.']
+                ]
+            ], 422);
+        }
+
+        // Check if there's already a pending registration for this position
+        $pendingRegistration = OfficerRegistration::where('usg_position', $validated['usg_position'])
+            ->whereIn('status', ['pending_verification', 'pending_approval'])
+            ->exists();
+
+        if ($pendingRegistration) {
+            return response()->json([
+                'message' => 'There is already a pending registration for this position.',
+                'errors' => [
+                    'usg_position' => ['A registration for ' . $validated['usg_position'] . ' is already pending approval.']
+                ]
+            ], 422);
+        }
+
         // Create registration request
         $registration = OfficerRegistration::create([
             'full_name' => $validated['full_name'],
@@ -129,12 +164,29 @@ class OfficerRegistrationController extends Controller
         $validated = $request->validate([
             'role' => 'required|in:usg_officer,event_organizer,admin',
             'permissions' => 'nullable|array',
+            'term_start' => 'required|date',
+            'term_end' => 'required|date|after:term_start',
         ]);
 
         $registration = OfficerRegistration::findOrFail($id);
 
         if ($registration->status !== 'pending_approval') {
             return response()->json(['message' => 'This registration is not pending approval.'], 400);
+        }
+
+        // Double-check position is not taken (in case another approval happened concurrently)
+        $positionTaken = User::where('usg_position', $registration->usg_position)
+            ->whereNotNull('usg_position')
+            ->where(function ($query) {
+                $query->whereNull('term_end')
+                      ->orWhere('term_end', '>=', now()->toDateString());
+            })
+            ->exists();
+
+        if ($positionTaken) {
+            return response()->json([
+                'message' => 'This position is currently occupied by another officer.'
+            ], 422);
         }
 
         // Create user account
@@ -145,6 +197,8 @@ class OfficerRegistrationController extends Controller
             'role' => $validated['role'],
             'permissions' => $validated['permissions'] ?? null,
             'usg_position' => $registration->usg_position,
+            'term_start' => $validated['term_start'],
+            'term_end' => $validated['term_end'],
             'email_verified_at' => now(), // Mark email as verified
         ]);
 

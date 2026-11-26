@@ -11,7 +11,7 @@ import EventDetailsModal from './src/components/EventDetailsModal';
 import BarcodeScanner from './src/components/BarcodeScanner';
 import { useTheme } from './src/context/ThemeContext';
 
-const API_URL = 'http://10.0.5.65:8000/api';
+const API_URL = 'https://ueventtrack.online/api';
 
 // Configure axios timeout
 axios.defaults.timeout = 10000; // 10 seconds timeout

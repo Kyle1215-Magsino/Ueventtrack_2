@@ -1,0 +1,7 @@
+# U-EventTrack Apache Configuration for Hostinger
+# This routes all requests to the Node.js application
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]

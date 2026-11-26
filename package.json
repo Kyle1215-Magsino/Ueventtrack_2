@@ -1,0 +1,23 @@
+{
+  "name": "ueventtrack",
+  "private": true,
+  "description": "U-EventTrack: Laravel API backend and React frontend for Hostinger deployment",
+  "engines": {
+    "node": ">=18.0.0",
+    "php": ">=8.2.0"
+  },
+  "scripts": {
+    "build": "npm ci --prefix frontend --include=dev && npm run build --prefix frontend && cd backend && composer install --optimize-autoloader --no-dev && php artisan config:cache && php artisan route:cache && php artisan view:cache",
+    "start": "node server.js",
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"cd backend && php artisan serve\"",
+    "migrate": "cd backend && php artisan migrate --force",
+    "seed": "cd backend && php artisan db:seed --force"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-http-proxy": "^2.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

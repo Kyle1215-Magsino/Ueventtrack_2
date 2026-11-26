@@ -19,6 +19,8 @@ class User extends Authenticatable
         'role',
         'permissions',
         'usg_position',
+        'term_start',
+        'term_end',
         'student_record_id',
         'archived',
         'profile_image',
