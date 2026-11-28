@@ -1,10 +1,8 @@
 const express = require('express');
 const path = require('path');
-const proxy = require('express-http-proxy');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const LARAVEL_HOST = process.env.LARAVEL_HOST || 'localhost:8000';
 
 // Trust proxy (required for Hostinger behind reverse proxy)
 app.set('trust proxy', true);
@@ -21,58 +19,34 @@ if (process.env.NODE_ENV !== 'production') {
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
-    service: 'U-EventTrack',
+    service: 'U-EventTrack Frontend',
     timestamp: new Date().toISOString() 
   });
 });
 
-// Serve Laravel storage files (uploaded images, barcodes, etc.)
-app.use('/storage', proxy(LARAVEL_HOST, {
-  proxyReqPathResolver: (req) => {
-    return '/storage' + req.url;
-  }
-}));
+// Redirect API requests to Laravel backend
+// Laravel should be served directly by Apache at /backend/public/
+app.use('/api', (req, res) => {
+  // Use the same host the user is accessing
+  const backendUrl = `${req.protocol}://${req.get('host')}/backend/public/api${req.url}`;
+  console.log(`Redirecting API: ${req.url} -> ${backendUrl}`);
+  res.redirect(307, backendUrl);
+});
 
-// Proxy all /api requests to Laravel backend
-app.use('/api', proxy(LARAVEL_HOST, {
-  proxyReqPathResolver: (req) => {
-    const url = '/api' + req.url;
-    console.log(`Proxying API: ${req.method} ${url}`);
-    return url;
-  },
-  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-    // Forward original headers
-    proxyReqOpts.headers['X-Forwarded-For'] = srcReq.ip;
-    proxyReqOpts.headers['X-Forwarded-Proto'] = srcReq.protocol;
-    proxyReqOpts.headers['X-Forwarded-Host'] = srcReq.get('host');
-    return proxyReqOpts;
-  },
-  userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
-    // Log API responses in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`API Response: ${userRes.statusCode} ${userReq.url}`);
-    }
-    return proxyResData;
-  },
-  proxyErrorHandler: (err, res, next) => {
-    console.error('❌ Laravel API Proxy Error:', err.message);
-    res.status(500).json({ 
-      error: 'Backend API Error',
-      message: 'The Laravel backend API is not responding. Please ensure Laravel is running on port 8000.',
-      details: process.env.NODE_ENV === 'production' ? undefined : err.message
-    });
-  }
-}));
+// Redirect storage requests to Laravel
+app.use('/storage', (req, res) => {
+  const storageUrl = `${req.protocol}://${req.get('host')}/backend/storage/app/public${req.url}`;
+  res.redirect(307, storageUrl);
+});
 
 // Serve React static files from frontend/dist
 const frontendPath = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(frontendPath, {
-  maxAge: '1d', // Cache static assets for 1 day
+  maxAge: '1d',
   etag: true
 }));
 
 // Serve React app for all other routes (SPA fallback)
-// This must be LAST to allow API and storage routes to work
 app.get('*', (req, res) => {
   const indexPath = path.join(frontendPath, 'index.html');
   res.sendFile(indexPath, (err) => {
@@ -94,23 +68,14 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('\n🚀 U-EventTrack Server Started');
+  console.log('\n🚀 U-EventTrack Frontend Server Started');
   console.log('=====================================');
   console.log(`📱 Frontend:        http://localhost:${PORT}`);
-  console.log(`🔌 API Proxy:       http://localhost:${PORT}/api -> http://${LARAVEL_HOST}/api`);
-  console.log(`📦 Storage Proxy:   http://localhost:${PORT}/storage -> http://${LARAVEL_HOST}/storage`);
+  console.log(`🔌 API (Apache):    http://localhost:${PORT}/backend/public/api`);
+  console.log(`📦 Storage:         http://localhost:${PORT}/backend/storage/app/public`);
   console.log(`🏥 Health Check:    http://localhost:${PORT}/health`);
   console.log(`🌍 Environment:     ${process.env.NODE_ENV || 'development'}`);
   console.log('=====================================\n');
-  
-  // Warn if Laravel backend is not reachable
-  const http = require('http');
-  http.get(`http://${LARAVEL_HOST}/api/health`, (res) => {
-    if (res.statusCode === 200) {
-      console.log('✅ Laravel backend is reachable\n');
-    }
-  }).on('error', (err) => {
-    console.warn('⚠️  WARNING: Laravel backend is not reachable at', LARAVEL_HOST);
-    console.warn('   Make sure Laravel is running: cd backend && php artisan serve\n');
-  });
+  console.log('⚠️  Note: Laravel backend is served by Apache at /backend/public/');
+  console.log('    Make sure your .htaccess is configured correctly.\n');
 });

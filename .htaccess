@@ -1,7 +1,55 @@
-# U-EventTrack Apache Configuration for Hostinger
-# This routes all requests to the Node.js application
+# U-EventTrack - Hostinger Apache Configuration
+# API/Storage → Laravel (Apache/PHP), Everything else → Node.js (Frontend)
 
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Force HTTPS (optional, recommended for production)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # 1. API requests → Laravel backend/public/index.php
+    RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
+    
+    # 2. Storage files → Laravel storage
+    RewriteRule ^storage/(.*)$ backend/storage/app/public/$1 [L]
+    
+    # 3. Backend static assets (CSS, JS from Laravel if any)
+    RewriteCond %{REQUEST_URI} ^/backend/public/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    
+    # 4. Everything else → Node.js frontend on port 3000
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/storage/
+    RewriteCond %{REQUEST_URI} !^/backend/
+    RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+</IfModule>
+
+# Enable PHP processing
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Laravel backend directory permissions
+<Directory "backend/public">
+    Options +FollowSymLinks -Indexes
+    AllowOverride All
+    Require all granted
+</Directory>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # CORS headers for API
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>

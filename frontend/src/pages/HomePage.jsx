@@ -85,10 +85,8 @@ export default function HomePage() {
 
               {/* Headline */}
               <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-semibold text-gray-900 dark:text-white leading-[0.95] tracking-tight">
-                Attendance
-                <br />
                 <span className="bg-gradient-to-r from-green-600 via-emerald-500 to-teal-600 dark:from-green-400 dark:via-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
-                  Reimagined
+                  Attendance
                 </span>
               </h1>
 
